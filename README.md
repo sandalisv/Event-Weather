@@ -2,13 +2,14 @@
 This a event management system where user can add , view , list all and delete a event.
 
 ### 1. Clone or Unzip the project.
-
+		github clone url - https://github.com/sandalisv/Event-Weather.git
 
 ### 2. Import the project into a IDE (IntelliJ Idea steps are described).
 
 		right click the pom.xml file -> open with -> select IntelliJ -> Click on "New Window" in popup
 	
 ### 3. Click on refresh icon in the maven tab.
+		view -> tool windows -> maven -> click on the refresh icon.
 
 
 ### 4. Import src/main/resources/DbCreation.sql into MySQL Workbench and run the file to create the schema and tables.
@@ -113,9 +114,9 @@ http://localhost:8080/eventManagement/events/<id>
 
 ### NOTE - Replace <id> with actual id 
 
-### NOTE - For more details about assumptions please refer "EventManagement" word file in event.management folder.
+### NOTE - For more details about assumptions please refer "EventManagement" word file in current folder.
 
-### NOTE - You can import the postman collection "EventManagement.postman_collection.json" in event.management folder and edit JSON body and <id> accordingly to try the application.
+### NOTE - You can import the postman collection "EventManagement.postman_collection.json" in current folder and edit JSON body and <id> accordingly to try the application.
 
 
 

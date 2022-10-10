@@ -40,6 +40,7 @@ logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
 
 ### 6. Import the guest details in GuestInsert.sql in src/main/resources to MySQL Workbench and run the sql file to insert guests to guest table.
 
+### NOTE: My openweathermap key is hard coded in the code. Please replace it if needed in EventServiceImpl.java (Change APP_ID value with your key).
 
 ### 7. Right click on Application.java file and run Java Application
 

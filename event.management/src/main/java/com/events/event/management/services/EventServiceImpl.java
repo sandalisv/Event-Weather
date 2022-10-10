@@ -37,6 +37,11 @@ public class EventServiceImpl implements EventService {
     private EventDAO dao;
 
     /**
+     * The API Key for openweathwemap. Please replace with your key.
+     */
+    private static final String APP_ID = "921ccf6a3e57a4011ff63e3d20c6ab59";
+
+    /**
      * The type Event service.
      */
     @Override
@@ -84,7 +89,7 @@ public class EventServiceImpl implements EventService {
      * This function will return the GeoCode of the location using city and country as parameters and calling external API.
      */
     private List<GeoCode> getGeo(String city, String country) throws CustomApiException {
-        final String locationUri = "http://api.openweathermap.org/geo/1.0/direct?q=" + city + "," + country + "&limit=1&appid=921ccf6a3e57a4011ff63e3d20c6ab59";
+        final String locationUri = "http://api.openweathermap.org/geo/1.0/direct?q=" + city + "," + country + "&limit=1&appid="+APP_ID;
         RestTemplate restTemplate = new RestTemplate();
         ParameterizedTypeReference<List<GeoCode>> responseType = new ParameterizedTypeReference<List<GeoCode>>() {
         };
@@ -103,10 +108,10 @@ public class EventServiceImpl implements EventService {
      * This function will return a String with weather data during the event as a comma separated values and calling external API.
      */
     private String getWeather(double lat, double lon, LocalDate date, LocalTime startTime, LocalTime endTime) throws CustomApiException, CustomDateException {
-        final String weatherUri = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid=921ccf6a3e57a4011ff63e3d20c6ab59";
+        final String weatherUri = "http://api.openweathermap.org/data/2.5/forecast?lat=" + lat + "&lon=" + lon + "&appid="+APP_ID;
         RestTemplate restTemplate = new RestTemplate();
         WeatherRes weatherRes = new WeatherRes();
-        String weather = null;
+        String weatherString = null;
         ParameterizedTypeReference<WeatherRes> responseType = new ParameterizedTypeReference<WeatherRes>() {
         };
         try {
@@ -120,28 +125,28 @@ public class EventServiceImpl implements EventService {
             if (isValidDateRange(date, LocalDate.now().plusDays(5))) {
 
                 String formattedDate = formatDate(date, "yyyy-MM-dd");
-                List<WeatherList> weathers = new ArrayList<>();
-                List<Weather> weL = new ArrayList<>();
+                List<WeatherList> weatherLists = new ArrayList<>();
+                List<Weather> weathers = new ArrayList<>();
                 if (weatherRes != null) {
-                    weathers = weatherRes.getWeatherList().stream()
+                    weatherLists = weatherRes.getWeatherList().stream()
                             .filter(a -> a.dt_txt.contains(formattedDate)).collect(Collectors.toList());
                 }
-                weL = getWeatherList(date, startTime, endTime, weathers, weL);
-                weather = getWeatherString(weL);
+                weathers = getWeatherList(date, startTime, endTime, weatherLists, weathers);
+                weatherString = getWeatherString(weathers);
             } else throw new CustomDateException(date + " is invalid");
         } catch (CustomDateException e) {
             e.printStackTrace();
         }
 
-        return weather;
+        return weatherString;
     }
 
     /**
      * This function will construct a String with weather data during the event as a comma separated values.
      */
-    private static String getWeatherString(List<Weather> weL) {
+    private static String getWeatherString(List<Weather> weathers) {
         String weather = null;
-        for (Weather we : weL) {
+        for (Weather we : weathers) {
             if (weather == null) {
                 weather = we.main;
             } else {
@@ -154,26 +159,21 @@ public class EventServiceImpl implements EventService {
     /**
      * This function will return a List of Weather .
      */
-    private List<Weather> getWeatherList(LocalDate date, LocalTime startTime, LocalTime endTime, List<WeatherList> weathers, List<Weather> weL) {
-        for (WeatherList w : weathers) {
+    private List<Weather> getWeatherList(LocalDate date, LocalTime startTime, LocalTime endTime, List<WeatherList> weatherLists, List<Weather> weathers) {
+        for (WeatherList w : weatherLists) {
             LocalDateTime date1 = parseDate(w.dt_txt, "yyyy-MM-dd HH:mm:ss");
             Instant wDate = date1.toInstant(ZoneOffset.UTC);
             Instant sTime = startTime.atDate(date).atZone(ZoneOffset.UTC).toInstant();
             Instant eTime = endTime.atDate(date).atZone(ZoneOffset.UTC).toInstant();
-            Duration sDur = Duration.between(sTime, wDate);
-            Duration eDur = Duration.between(eTime, wDate);
             Duration res = Duration.between(sTime, eTime);
-            System.out.println("start time and wdate duration  " + sDur.toMinutes());
-            System.out.println("end time and wdate duration  " + eDur.toMinutes());
-            System.out.println("start time and end time duration  " + res.toMinutes());
             if (sTime.isBefore(wDate) && eTime.isAfter(wDate) && res.toMinutes() > 180) {
-                weL.add(w.getWeather().stream().collect(Collectors.toList()).get(0));
+                weathers.add(w.getWeather().stream().collect(Collectors.toList()).get(0));
             } else if (sTime.isBefore(wDate) && res.toMinutes() <= 180) {
-                weL = w.getWeather().stream().collect(Collectors.toList());
+                weathers = w.getWeather().stream().collect(Collectors.toList());
                 break;
             }
         }
-        return weL;
+        return weathers;
     }
 
     /**

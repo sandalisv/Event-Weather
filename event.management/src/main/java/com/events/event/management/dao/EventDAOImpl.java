@@ -27,7 +27,9 @@ public class EventDAOImpl implements EventDAO {
     public List<Event> getEvents() throws CustomDbException {
         String hql = "FROM Event as evnt ORDER BY evnt.id";
         try {
-            return entityManager.createQuery(hql).getResultList();
+            if (entityManager.createQuery(hql).getResultList() == null || entityManager.createQuery(hql).getResultList().isEmpty())
+                throw new CustomDbException("No events are there in the database.");
+            else return entityManager.createQuery(hql).getResultList();
         } catch (Exception e) {
             throw new CustomDbException(e.getMessage(), e.getCause());
         }
@@ -37,7 +39,9 @@ public class EventDAOImpl implements EventDAO {
     @Override
     public Event getEvent(int eventId) throws CustomDbException {
         try {
-            return entityManager.find(Event.class, eventId);
+            if (entityManager.find(Event.class, eventId) != null)
+                return entityManager.find(Event.class, eventId);
+            else throw new CustomDbException("Event with id "+eventId+" does not exist in the database.");
         } catch (Exception e) {
             throw new CustomDbException(e.getMessage(), e.getCause());
         }
@@ -67,7 +71,7 @@ public class EventDAOImpl implements EventDAO {
                     return true;
                 }
             }
-            else throw new CustomDbException("Event does not exist in the database");
+            else throw new CustomDbException("Event does not exist in the database.");
         } catch (Exception e) {
             throw new CustomDbException(e.getMessage(), e.getCause());
         }
